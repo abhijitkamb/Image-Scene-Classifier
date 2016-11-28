@@ -13,6 +13,8 @@ logging.basicConfig()
 # ..
 # .. load data ..
 lfw_people = datasets.fetch_lfw_people(min_faces_per_person=70, resize=0.4)
+print type(lfw_people)
+#lfw_people = load_sample_images()
 faces = np.reshape(lfw_people.data, (lfw_people.target.shape[0], -1))
 skf = model_selection.StratifiedKFold(n_splits=4)
 train, test = next(iter(skf.split(lfw_people.data, lfw_people.target)))
