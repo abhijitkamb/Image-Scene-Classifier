@@ -2,7 +2,7 @@ from PIL import Image
 import numpy as np
 import glob
 
-def load_data(x_dir, y_csv_file, size):
+def load_data(x_dir, y_csv_file, size, test):
 
     prefix = ''
     if size == 10:
@@ -11,6 +11,9 @@ def load_data(x_dir, y_csv_file, size):
         prefix = '000'
     elif size == 1000:
         prefix = '00'
+
+    if test == 1:
+        prefix = 'test_' + prefix 
 
     X_train_files = glob.glob(x_dir + '/' + prefix + '*.jpg')
     X_train = np.array([np.array(Image.open(fname)) for fname in X_train_files])

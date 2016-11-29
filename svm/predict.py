@@ -3,19 +3,28 @@ from sklearn import model_selection, datasets, decomposition, svm
 import numpy as np
 from sklearn.datasets import load_sample_image, load_sample_images
 import sys
+import util
 
 filename = raw_input("Enter file name (eg. abc.pkl) of the saved model: ")
 clf = joblib.load(filename)
 
 
 print 'loading data...'
+
 data = []
-testsize = 10
+NUMSAMPLES = 1000
+ISTEST = 1
+
+'''
 for i in range(1, testsize+1):
     num_zeroes = (5 - len(str(i))) * '0'
     l_img = load_sample_image('test_'+num_zeroes+str(i)+'.jpg')
     data.append(l_img)
     sys.stdout.write('.')
+'''
+
+data, target = util.load_data('../val', 'train.csv', NUMSAMPLES, ISTEST)
+
 
 print 'predicting...'
 test = np.array(data).reshape(len(data), -1)
@@ -25,7 +34,7 @@ print Y_test.shape
 
 # writing to csv file for submission
 print 'writing to csv file...'
-id = np.arange(1, testsize+1, 1)
+id = np.arange(1, NUMSAMPLES+1, 1)
 print id.shape, Y_test.shape
 
 id_str = id.tolist()
