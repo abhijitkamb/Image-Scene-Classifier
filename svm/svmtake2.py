@@ -22,8 +22,9 @@ logging.basicConfig()
 # lfw_people = datasets.fetch_lfw_people(min_faces_per_person=70, resize=0.4)
 # print(lfw_people.data.shape)
 
-NUM_SAMPLES = 7000
-NUM_COMP_PCA = 250
+NUM_SAMPLES = 7001
+NUM_COMP_PCA = 100
+BATCH_SIZE_PCA = 250
 print "loading data..."
 '''
 data = []
@@ -53,8 +54,10 @@ X_train, X_test, Y_train, Y_test = model_selection.train_test_split(X, Y, test_s
 
 # ..
 # .. dimension reduction ..
+'''
 print "doing pca..."
-pca = decomposition.PCA(svd_solver='randomized', n_components=NUM_COMP_PCA, whiten=True)
+#pca = decomposition.PCA(svd_solver='randomized', n_components=NUM_COMP_PCA, whiten=True)
+pca = decomposition.IncrementalPCA(n_components=NUM_COMP_PCA, batch_size=BATCH_SIZE_PCA, whiten=True)
 pca.fit(X_train)
 X_pca = pca.transform(X_train)
 X_test_pca = pca.transform(X_test)
@@ -68,7 +71,7 @@ print X_pca.shape
 # ..
 # .. classification ..
 #clf = svm.SVC(C=5., gamma=0.001)
-print "simple SVC..."
+print "simple rbf SVC..."
 clf = svm.SVC()
 # clf.fit(X_train_pca, y_train)
 clf.fit(X_pca, Y_train)
@@ -76,16 +79,20 @@ print "training set score"
 print clf.score(X_pca, Y_train)
 print "test set score"
 print clf.score(X_test_pca, Y_test)
+filename = raw_input("Finished Training. Please enter file name (eg. abc.pkl) to save model: ")
+joblib.dump(clf, filename)
 
 
-print "simple rbf SVC..."
-clf = svm.SVC(kernel='rbf')
+print "simple poly SVC..."
+clf = svm.SVC(kernel='poly')
 # clf.fit(X_train_pca, y_train)
 clf.fit(X_pca, Y_train)
 print "training set score"
 print clf.score(X_pca, Y_train)
 print "test set score"
 print clf.score(X_test_pca, Y_test)
+filename = raw_input("Finished Training. Please enter file name (eg. abc.pkl) to save model: ")
+joblib.dump(clf, filename)
 
 print "rbf small C=5 SVC..."
 clf = svm.SVC(kernel='rbf', C=5, gamma=0.001)
@@ -95,7 +102,8 @@ print "training set score"
 print clf.score(X_pca, Y_train)
 print "test set score"
 print clf.score(X_test_pca, Y_test)
-
+filename = raw_input("Finished Training. Please enter file name (eg. abc.pkl) to save model: ")
+joblib.dump(clf, filename)
 
 print "rbf large C=100 SVC..."
 clf = svm.SVC(kernel='rbf', C=100, gamma=0.001)
@@ -105,9 +113,20 @@ print "training set score"
 print clf.score(X_pca, Y_train)
 print "test set score"
 print clf.score(X_test_pca, Y_test)
+filename = raw_input("Finished Training. Please enter file name (eg. abc.pkl) to save model: ")
+joblib.dump(clf, filename)
 
-
-
+print "simple rbf C=100, gamma=0.1 SVC..."
+clf = svm.SVC(kernel='rbf', C=100, gamma=0.1)
+# clf.fit(X_train_pca, y_train)
+clf.fit(X_pca, Y_train)
+print "training set score"
+print clf.score(X_pca, Y_train)
+print "test set score"
+print clf.score(X_test_pca, Y_test)
+filename = raw_input("Finished Training. Please enter file name (eg. abc.pkl) to save model: ")
+joblib.dump(clf, filename)
+'''
 print "no pca at all simple svc..."
 clf = svm.SVC()
 # clf.fit(X_train_pca, y_train)
@@ -116,6 +135,9 @@ print "training set score"
 print clf.score(X, Y)
 print "test set score"
 print clf.score(X_test, Y_test)
+filename = raw_input("Finished Training. Please enter file name (eg. abc.pkl) to save model: ")
+joblib.dump(clf, filename)
+
 # saving model to file
 #filename = raw_input("Finished Training. Please enter file name (eg. abc.pkl) to save model: ")
 #joblib.dump(clf, filename) 
