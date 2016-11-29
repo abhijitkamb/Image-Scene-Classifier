@@ -9,6 +9,7 @@ import numpy as np
 from sklearn import model_selection, datasets, decomposition, svm
 from sklearn.datasets import load_sample_image, load_sample_images
 from sklearn.preprocessing import scale
+from sklearn.preprocessing import StandardScaler
 from scipy.misc import imresize
 import logging
 from os.path import dirname, join
@@ -54,6 +55,13 @@ X_train, X_test, Y_train, Y_test = model_selection.train_test_split(X, Y, test_s
 
 # ..
 # .. dimension reduction ..
+
+'''
+# scaling data
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+'''
+
 '''
 print "doing pca..."
 #pca = decomposition.PCA(svd_solver='randomized', n_components=NUM_COMP_PCA, whiten=True)
