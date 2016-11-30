@@ -57,4 +57,4 @@ def compressImg(x_dir, size=7000, test=0):
         labels = k_means.labels_
         data_compressed = np.choose(labels, values)
         data_compressed.shape = data.shape
-        misc.imsave('compressed/c_'+ fname.split("/")[1], data_compressed.reshape(128, 128, 3))
+        misc.imsave('compressed/'+ fname.split("/")[1], data_compressed.reshape(128, 128, 3))
