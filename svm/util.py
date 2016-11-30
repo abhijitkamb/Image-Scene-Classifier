@@ -24,7 +24,11 @@ def load_data(x_dir, y_csv_file, size, test):
     X_train = np.array([np.array(Image.open(fname)) for fname in X_train_files])
 
     # this is an (N, 1) array; remember to convert to 1-hot for CNN
-    y_train = np.genfromtxt(y_csv_file, delimiter=",")[:size+1,1][1:]
+    y_train = np.genfromtxt(y_csv_file, delimiter=",")[:size,1][1:]
+
+    for i in range(1,9):
+        print(np.sum(y_train == i))
+
     print(X_train.shape)
     print(y_train.shape)
     return X_train, y_train
@@ -50,7 +54,7 @@ def compressImg(x_dir, size=7000, test=0):
         data = np.array(Image.open(fname))
         data = np.array(data).reshape(-1, 1)
 
-        k_means = cluster.KMeans(n_clusters=5)
+        k_means = cluster.KMeans(n_clusters=3)
         k_means.fit(data)
 
         values = k_means.cluster_centers_.squeeze()
@@ -58,3 +62,4 @@ def compressImg(x_dir, size=7000, test=0):
         data_compressed = np.choose(labels, values)
         data_compressed.shape = data.shape
         misc.imsave('compressed/'+ fname.split("/")[1], data_compressed.reshape(128, 128, 3))
+
