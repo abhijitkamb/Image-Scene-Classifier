@@ -117,7 +117,7 @@ joblib.dump(clf, filename)
 
 
 print "simple poly SVC..."
-clf = svm.SVC(kernel='poly', degree=8)
+clf = svm.SVC(kernel='poly', degree=3)
 # clf.fit(X_train_pca, y_train)
 clf.fit(X_pca, Y_train)
 print "training set score"
@@ -138,7 +138,8 @@ print "test set score"
 print clf.score(X_test_pca, Y_test)
 filename = raw_input("Finished Training. Please enter file name (eg. abc.pkl) to save model: ")
 joblib.dump(clf, filename)
-'''
+
+
 print "rbf large C=100 SVC..."
 clf = svm.SVC(kernel='rbf', C=100, gamma=0.001)
 # clf.fit(X_train_pca, y_train)
@@ -162,7 +163,7 @@ filename = raw_input("Finished Training. Please enter file name (eg. abc.pkl) to
 joblib.dump(clf, filename)
 
 
-
+'''
 C_range = np.logspace(-2, 10, 5)
 #C_range = np.logspace(0.03125, 1024, 5)
 gamma_range = np.logspace(-9, 3, 5)
@@ -174,7 +175,7 @@ grid.fit(X, Y)
 
 print("The best parameters are %s with a score of %0.2f"
       % (grid.best_params_, grid.best_score_))
-
+'''
 
 print "no pca at all simple svc..."
 clf = svm.SVC()
@@ -186,6 +187,7 @@ print "test set score"
 print clf.score(X_test, Y_test)
 filename = raw_input("Finished Training. Please enter file name (eg. abc.pkl) to save model: ")
 joblib.dump(clf, filename)
+
 '''
 
 # saving model to file
@@ -197,4 +199,4 @@ joblib.dump(clf, filename)
 #print 'Score on unseen data: '
 #print clf.score(X_test_pca, y_test)
 #print clf.score(X_test, y_test)
-
+'''
