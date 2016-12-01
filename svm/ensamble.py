@@ -46,7 +46,7 @@ print("Init params", X.shape, Y.shape)
 #print(Y)
 
 # Set up Hog1
-Xhog1 = np.array([ np.array(hog(x, orientations=9, pixels_per_cell=(12, 12), cells_per_block=(2, 2), transform_sqrt=True))\
+Xhog1 = np.array([np.array(hog(x, orientations=9, pixels_per_cell=(12, 12), cells_per_block=(2, 2), transform_sqrt=True))\
                    for x in X])
 # Set up Hog2
 hog2 = cv2.HOGDescriptor()
