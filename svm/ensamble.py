@@ -5,6 +5,7 @@ from PIL import Image
 import glob
 from skimage import data, color, exposure, filters
 from skimage.feature import hog
+import imutils
 import cv2
 
 from sklearn.ensemble import VotingClassifier
@@ -34,24 +35,26 @@ size = 100
 
 X_train_files = glob.glob('/mnt/c/Users/akila/PycharmProjects/CSC411_A3/compressed/*.jpg')
 X_train_files.sort()
-X = np.array([color.rgb2gray(np.array(Image.open(fname))) for fname in X_train_files[:size-1]])
+X1 = np.array([color.rgb2gray(np.array(Image.open(fname))) for fname in X_train_files[:size-1]])
+X2 = [cv2.imread(fname) for fname in X_train_files[:size-1]]
+X2 = np.array([imutils.resize(x, width=min(400, x.shape[1])) for x in X2])
 
 Y = np.genfromtxt('train.csv', delimiter=",")[:size,1][1:]
 
 #for i in range(1,9):
 #    print(np.sum(y_train == i))
 
-print("Init params", X.shape, Y.shape)
+print("Init params", X1.shape, Y.shape)
 #print(X_train_files[:size])
 #print(Y)
 
 # Set up Hog1
 Xhog1 = np.array([np.array(hog(x, orientations=9, pixels_per_cell=(12, 12), cells_per_block=(2, 2), transform_sqrt=True))\
-                   for x in X])
+                   for x in X1])
 # Set up Hog2
 hog2 = cv2.HOGDescriptor()
 hog2.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
-Xhog2 = np.array([hog2.detectMultiScale(x, winStride=(4, 4), padding=(8, 8), scale=1.05) for x in X])
+Xhog2 = np.array([hog2.detectMultiScale(x, winStride=(4, 4), padding=(8, 8), scale=1.05) for x in X2])
 
 print("Hog params: ", Xhog1.shape, Y.shape)
 
