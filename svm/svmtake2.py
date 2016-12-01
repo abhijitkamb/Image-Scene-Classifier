@@ -23,7 +23,7 @@ logging.basicConfig()
 # lfw_people = datasets.fetch_lfw_people(min_faces_per_person=70, resize=0.4)
 # print(lfw_people.data.shape)
 
-NUM_SAMPLES = 1000
+NUM_SAMPLES = 200
 NUM_COMP_PCA = 100
 BATCH_SIZE_PCA = 250
 ISTEST = 0
@@ -69,23 +69,17 @@ X_train, X_test, Y_train, Y_test = model_selection.train_test_split(X, Y, test_s
 
 
 print "doing pca..."
-pca = decomposition.PCA()
+pca = decomposition.PCA(n_components=100)
 #pca = decomposition.IncrementalPCA(n_components=NUM_COMP_PCA, batch_size=BATCH_SIZE_PCA, whiten=True)
 pca.fit(X_train)
-#n_components_pca_mle = pca.n_components_
-#print("best n_components by PCA MLE = %d" % n_components_pca_mle)
-
-
-
-
 X_pca = pca.transform(X_train)
-X_test_pca = pca.transform(X_test)
-# X_train_pca = pca.transform(X_train)
 #X_test_pca = pca.transform(X_test)
+# X_train_pca = pca.transform(X_train)
+X_test_pca = pca.transform(X_test)
 
 #print(X_train.shape, X_test.shape)
 #print(y_train.shape, y_test.shape)
-print X_pca.shape
+#print X_pca.shape
 
 '''
 # ..
@@ -102,20 +96,33 @@ print clf.score(X_test_pca, Y_test)
 filename = raw_input("Finished Training. Please enter file name (eg. abc.pkl) to save model: ")
 joblib.dump(clf, filename)
 
+
+#param_grid = {'C': [1e3, 5e3, 1e4, 5e4, 1e5], 'gamma': [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.1], }
+param_grid = {'C': [1, 5e3, 1e5], 'gamma': [0.0001, 0.001, 0.01, 0.1], }
+
+#cv = model_selection.StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=42)
+clf = model_selection.GridSearchCV(svm.SVC(kernel='linear', class_weight='balanced'), param_grid=param_grid)
+clf = clf.fit(X_pca, Y_train)
+
+print("The best parameters : ")
+print(clf.best_estimator_)
 '''
-print "simple linear SVC..."
+#print "simple linear SVC..."
+#clf = svm.SVC(kernel='linear')
+#clf.fit(X_pca, Y_train)
 clf = svm.SVC(kernel='linear')
-# clf.fit(X_train_pca, y_train)
 clf.fit(X_pca, Y_train)
 print "training set score"
 print clf.score(X_pca, Y_train)
 print "test set score"
 print clf.score(X_test_pca, Y_test)
+
+print clf.predict(X_test_pca, Y_test)
 filename = raw_input("Finished Training. Please enter file name (eg. abc.pkl) to save model: ")
 joblib.dump(clf, filename)
 
 
-
+'''
 print "simple poly SVC..."
 clf = svm.SVC(kernel='poly', degree=3)
 # clf.fit(X_train_pca, y_train)
@@ -162,31 +169,18 @@ print clf.score(X_test_pca, Y_test)
 filename = raw_input("Finished Training. Please enter file name (eg. abc.pkl) to save model: ")
 joblib.dump(clf, filename)
 
-
-'''
-C_range = np.logspace(-2, 10, 5)
-#C_range = np.logspace(0.03125, 1024, 5)
-gamma_range = np.logspace(-9, 3, 5)
-#gamma_range = np.logspace(0.000030517, 8, 5)
-param_grid = dict(gamma=gamma_range, C=C_range)
-cv = model_selection.StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=42)
-grid = model_selection.GridSearchCV(svm.SVC(), param_grid=param_grid, cv=cv)
-grid.fit(X, Y)
-
-print("The best parameters are %s with a score of %0.2f"
-      % (grid.best_params_, grid.best_score_))
 '''
 
 print "no pca at all simple svc..."
-clf = svm.SVC()
+clfp = svm.SVC(kernel='linear')
 # clf.fit(X_train_pca, y_train)
-clf.fit(X_train, Y_train)
+clfp.fit(X_train, Y_train)
 print "training set score"
-print clf.score(X_train, Y_train)
+print clfp.score(X_train, Y_train)
 print "test set score"
-print clf.score(X_test, Y_test)
+print clfp.score(X_test, Y_test)
 filename = raw_input("Finished Training. Please enter file name (eg. abc.pkl) to save model: ")
-joblib.dump(clf, filename)
+joblib.dump(clfp, filename)
 
 '''
 

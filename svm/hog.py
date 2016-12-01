@@ -18,13 +18,13 @@ from skimage import data, color, exposure
 #def load_data(x_dir, y_csv_file, size, test):
 from skimage.feature import hog
 
-size = 3001
+size = 7000
 
 X_train_files = glob.glob('../train/*.jpg')
 X_train_files.sort()
-X = np.array([color.rgb2gray(np.array(Image.open(fname))) for fname in X_train_files[:size-1]])
+X = np.array([color.rgb2gray(np.array(Image.open(fname))) for fname in X_train_files[:size]])
 
-Y = np.genfromtxt('train.csv', delimiter=",")[:size,1][1:]
+Y = np.genfromtxt('train.csv', delimiter=",")[:size+1,1][1:]
 
 
 #for i in range(1,9):
@@ -34,7 +34,7 @@ print(X.shape, Y.shape)
 #print(X_train_files[:size])
 #print(Y)
 
-Xhog = np.array([ np.array(hog(x, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(1, 1), transform_sqrt=True)) for x in X])
+Xhog = np.array([ np.array(hog(x, orientations=9, pixels_per_cell=(12, 12), cells_per_block=(2, 2), transform_sqrt=True)) for x in X])
 
 print(Xhog.shape, Y.shape)
 
@@ -42,8 +42,8 @@ print(Xhog.shape, Y.shape)
 
 X_train, X_test, Y_train, Y_test = model_selection.train_test_split(Xhog.reshape(len(Xhog), -1), Y, test_size=0.10, random_state=37)
 
-
-clf = svm.SVC(kernel='rbf', C=1, gamma=0.01)
+#class_weights={1: 2, 2:3, 3:4, 4:6, 5:4, 6:10, 7:10, 8:10}
+clf = svm.SVC(kernel='rbf', C=10, gamma=0.01)#, class_weight=class_weights)
 clf.fit(X_train, Y_train)
 print "training set score"
 print clf.score(X_train, Y_train)

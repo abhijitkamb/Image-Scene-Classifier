@@ -6,6 +6,7 @@ import glob
 
 def load_data(x_dir, y_csv_file, size, test):
 
+    prefix = ''
     if test == 1:
         prefix = 'test_' + prefix 
 
