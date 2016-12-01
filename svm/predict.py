@@ -4,6 +4,12 @@ import numpy as np
 from sklearn.datasets import load_sample_image, load_sample_images
 import sys
 import util
+from PIL import Image
+from scipy import misc
+from sklearn import cluster
+import glob
+from skimage import data, color, exposure
+from skimage.feature import hog
 
 filename = raw_input("Enter file name (eg. abc.pkl) of the saved model: ")
 clf = joblib.load(filename)
@@ -12,22 +18,27 @@ clf = joblib.load(filename)
 print 'loading data...'
 
 data = []
-NUMSAMPLES = 1000
-ISTEST = 1
+NUMSAMPLES = 2970
+#ISTEST = 1
 
-'''
-for i in range(1, testsize+1):
-    num_zeroes = (5 - len(str(i))) * '0'
-    l_img = load_sample_image('test_'+num_zeroes+str(i)+'.jpg')
-    data.append(l_img)
-    sys.stdout.write('.')
-'''
+size1 = 970
+X_test_files = glob.glob('../val/*.jpg')
+X_test_files.sort()
+X1 = np.array([color.rgb2gray(np.array(Image.open(fname))) for fname in X_test_files[:size1]])
 
-data, target = util.load_data('../val', 'train.csv', NUMSAMPLES, ISTEST)
+size2 = 2000
+X_test2_files = glob.glob('../test_128/*.jpg')
+X_test2_files.sort()
+X2 = np.array([color.rgb2gray(np.array(Image.open(fname))) for fname in X_test2_files[:size2]])
 
+print X1.shape, X2.shape
+X = np.concatenate([X1,X2])
+print X.shape
+
+Xhog = np.array([ np.array(hog(x, orientations=9, pixels_per_cell=(12, 12), cells_per_block=(2, 2), transform_sqrt=True)) for x in X])
 
 print 'predicting...'
-test = np.array(data).reshape(len(data), -1)
+test = np.array(Xhog).reshape(len(Xhog), -1)
 Y_test = clf.predict(test)
 print Y_test
 print Y_test.shape
