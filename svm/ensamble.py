@@ -5,8 +5,6 @@ from PIL import Image
 import glob
 from skimage import data, color, exposure, filters
 from skimage.feature import hog
-import imutils
-import cv2
 
 from sklearn.ensemble import VotingClassifier
 
@@ -31,47 +29,42 @@ def getDataDistribution(Y_test, p, name):
     return d_pred, d_test
 
 
-size = 100
+size = 2000
 
-X_train_files = glob.glob('/mnt/c/Users/akila/PycharmProjects/CSC411_A3/compressed/*.jpg')
+X_train_files = glob.glob('compressed/*.jpg')
 X_train_files.sort()
-X1 = np.array([color.rgb2gray(np.array(Image.open(fname))) for fname in X_train_files[:size-1]])
-X2 = [cv2.imread(fname) for fname in X_train_files[:size-1]]
-X2 = np.array([imutils.resize(x, width=min(400, x.shape[1])) for x in X2])
 
-Y = np.genfromtxt('train.csv', delimiter=",")[:size,1][1:]
+X = np.array([color.rgb2gray(np.array(Image.open(fname))) for fname in X_train_files[:size]])
+
+Y = np.genfromtxt('train.csv', delimiter=",")[:size+1,1][1:]
 
 #for i in range(1,9):
 #    print(np.sum(y_train == i))
 
-print("Init params", X1.shape, Y.shape)
+print("Init params", X.shape, Y.shape)
 #print(X_train_files[:size])
 #print(Y)
 
 # Set up Hog1
-Xhog1 = np.array([np.array(hog(x, orientations=9, pixels_per_cell=(12, 12), cells_per_block=(2, 2), transform_sqrt=True))\
-                   for x in X1])
-# Set up Hog2
-hog2 = cv2.HOGDescriptor()
-hog2.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
-Xhog2 = np.array([hog2.detectMultiScale(x, winStride=(4, 4), padding=(8, 8), scale=1.05) for x in X2])
+Xhog = np.array([np.array(hog(x, orientations=9, pixels_per_cell=(12, 12), cells_per_block=(2, 2), transform_sqrt=True))\
+                   for x in X])
 
-print("Hog params: ", Xhog1.shape, Y.shape)
+print("Hog params: ", Xhog.shape, Y.shape)
 
 #Xhog = StandardScaler().fit_transform(Xhog)
 
 X_train, X_test, Y_train, Y_test = \
-    model_selection.train_test_split(Xhog1.reshape(len(Xhog1), -1), Y, test_size=0.10, random_state=37)
+    model_selection.train_test_split(Xhog.reshape(len(Xhog), -1), Y, test_size=0.10, random_state=37)
 
-X_train2, X_test2, Y_train2, Y_test2 = \
-    model_selection.train_test_split(Xhog2.reshape(len(Xhog2), -1), Y, test_size=0.10, random_state=37)
 
 clf1 = svm.SVC(kernel='rbf', C=10, gamma=0.01, probability=True, cache_size=1000)
-clf2 = svm.SVC(kernel='rbf', C=10, gamma=0.01, probability=True, cache_size=1000)
-clf = VotingClassifier(estimators=[('hog', clf1), ('sobel', clf2)], voting='hard', weights=[1,1])
+clf2 = svm.SVC(kernel='rbf', C=10, gamma=0.01, probability=True, cache_size=1000, class_weight={1:1,2:2,3:20,4:20,5:1,6:5})
+clf3 = svm.SVC(kernel='rbf', C=10, gamma=0.01, probability=True, cache_size=1000, class_weight={1:5,2:5,3:10,4:10,5:5,6:10})
+clf = VotingClassifier(estimators=[('hog', clf1), ('hog2', clf2), ('hog3', clf3)], voting='soft', weights=[1,1,1])
 
 clf1.fit(X_train, Y_train)
-clf2.fit(X_train2, Y_train2)
+clf2.fit(X_train, Y_train)
+clf3.fit(X_train, Y_train)
 clf.fit(X_train, Y_train)
 
 print "clf1 training set score"
@@ -93,6 +86,16 @@ p2 = clf2.predict(X_test)
 print(p2[:21], Y_test[:21])
 
 getDataDistribution(Y_test, p2, 'clf2')
+
+print "clf2 training set score"
+print clf3.score(X_train, Y_train)
+print "clf2 test set score"
+print clf3.score(X_test, Y_test)
+
+p3 = clf3.predict(X_test)
+print(p3[:21], Y_test[:21])
+
+getDataDistribution(Y_test, p3, 'clf2')
 
 print "clf training set score"
 print clf.score(X_train, Y_train)
